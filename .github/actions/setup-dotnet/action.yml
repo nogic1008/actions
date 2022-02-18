@@ -1,0 +1,29 @@
+name: Setup .NET SDK with cache
+description: Call actions/setup-dotnet with NuGet package cache.
+inputs:
+  dotnet-version:
+    description: 'Optional SDK version(s) to use. If not provided, will install global.json version when available. Examples: 2.2.104, 3.1, 3.1.x'
+  include-prerelease:
+    description: 'Whether prerelease versions should be matched with non-exact versions (for example 5.0.0-preview.6 being matched by 5, 5.0, 5.x or 5.0.x). Defaults to false if not provided.'
+    default: false
+  nuget-path:
+    description: Path to use for the global-packages folder
+    default: ${{ github.workspace }}/.nuget/packages
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        echo "DOTNET_CLI_TELEMETRY_OPTOUT=true" >> $GITHUB_ENV
+        echo "DOTNET_NOLOGO=true" >> $GITHUB_ENV
+        echo "NUGET_PACKAGES=${{ inputs.nuget-path }}" >> $GITHUB_ENV
+    - uses: actions/cache@v2.1.7
+      with:
+        path: ${{ inputs.nuget-path }}
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    - uses: actions/setup-dotnet@v1.9.0
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+        include-prerelease: ${{ inputs.include-prerelease }}

@@ -17,6 +17,8 @@ jobs:
     name: Check Format
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3.0.2
         with:

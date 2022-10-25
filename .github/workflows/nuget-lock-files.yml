@@ -20,13 +20,26 @@ on:
         description: GitHub Personal Access Token to update lock files.
         required: false
 
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_NOLOGO: true
+  NUGET_XMLDOC_MODE: skip
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
 jobs:
   validate:
     name: Validate
     runs-on: ubuntu-latest
     steps:
+      - name: Cache
+        uses: actions/cache@v3.0.11
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
       - name: Setup .NET SDK
-        uses: ./.github/actions/dotnet/setup.yml
+        uses: actions/setup-dotnet@v3.0.2
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
           dotnet-quality: ${{ inputs.dotnet-quality }}
@@ -45,8 +58,15 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      - name: Cache
+        uses: actions/cache@v3.0.11
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
       - name: Setup .NET SDK
-        uses: ./.github/actions/dotnet/setup.yml
+        uses: actions/setup-dotnet@v3.0.2
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
           dotnet-quality: ${{ inputs.dotnet-quality }}

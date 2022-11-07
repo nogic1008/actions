@@ -75,8 +75,10 @@ jobs:
 
       - name: Restore and Update lock files
         run: dotnet restore --force-evaluate
-      - name: Fix Format
-        run: npx eclint fix "**/packages.lock.json"
+      - name: Run ECLint
+        run: |
+          npm install -g eclint
+          eclint fix "**/packages.lock.json"
 
       - name: Commit & Push
         run: |

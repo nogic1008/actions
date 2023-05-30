@@ -15,6 +15,11 @@ on:
         description: 'Optional quality of the build. The possible values are: daily, signed, validated, preview, ga.'
         type: string
         required: false
+      lock-file-path:
+        description: 'Used to specify the path to a dependency file: packages.lock.json. Supports wildcards or a list of file names for caching multiple dependencies.'
+        type: string
+        required: false
+        default: '**/packages.lock.json'
     secrets:
       PERSONAL_ACCESS_TOKEN:
         description: GitHub Personal Access Token to update lock files.
@@ -32,19 +37,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.1.0
-      - name: Cache
-        uses: actions/cache@v3.0.11
-        with:
-          path: ${{ env.NUGET_PACKAGES }}
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
+        uses: actions/checkout@v3
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3.0.2
+        uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
           dotnet-quality: ${{ inputs.dotnet-quality }}
+          cache: true
+          cache-dependency-path: ${{ inputs.lock-file-path }}
 
       - name: Restore with lock files
         run: dotnet restore --locked-mode
@@ -56,29 +56,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-      - name: Cache
-        uses: actions/cache@v3.0.11
-        with:
-          path: ${{ env.NUGET_PACKAGES }}
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3.0.2
+        uses: actions/setup-dotnet@v3.2.0
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
           dotnet-quality: ${{ inputs.dotnet-quality }}
+          cache: true
+          cache-dependency-path: ${{ inputs.lock-file-path }}
 
       - name: Restore and Update lock files
         run: dotnet restore --force-evaluate
       - name: Run ECLint
         run: |
           npm install -g eclint
-          eclint fix "**/packages.lock.json"
+          eclint fix "${{ inputs.lock-file-path }}"
 
       - name: Commit & Push
         run: |

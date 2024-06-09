@@ -37,9 +37,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3.2.0
+        uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
           dotnet-quality: ${{ inputs.dotnet-quality }}
@@ -56,12 +56,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3.2.0
+        uses: actions/setup-dotnet@v4.0.0
         with:
           dotnet-version: ${{ inputs.dotnet-version }}
           dotnet-quality: ${{ inputs.dotnet-quality }}
